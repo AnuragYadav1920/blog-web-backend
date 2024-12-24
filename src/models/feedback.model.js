@@ -1,10 +1,6 @@
 import mongoose, {Schema} from 'mongoose'
 
 const feedbackSchema = new Schema({
-    userId:{
-        type:Schema.Types.ObjectId,
-        ref:"User"
-    },
     email:{
         type:String,
         required: true
@@ -16,6 +12,14 @@ const feedbackSchema = new Schema({
     description:{
         type:String,
         required: true
+    },
+    fullName:{
+        type:String,
+        required: true
+    },
+    avatar:{
+        type:String,
+        default:""
     }
 },{timestamps: true})
 

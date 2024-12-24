@@ -25,4 +25,5 @@ router.route("/get-user-details").get(verifyJWT, getUserDetails)
 
 
 
+
 export {router as userRouter}

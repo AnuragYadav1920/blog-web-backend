@@ -10,7 +10,15 @@ const commentSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required:true
+    },
+    username:{
+      type:String,
+      default:""
+    },
+    avatar:{
+      type:String,
+      default:""
     },
     comment: {
       type: String,
