@@ -63,7 +63,7 @@ const updateFields = {};
   if (category) updateFields.category = category;
 
   const updatedBlog = await Blog.findByIdAndUpdate(
-     req.params._id,
+     req.params.id,
     {
       $set :updateFields
     },
@@ -95,7 +95,7 @@ const updateBlogImage = asyncHandler(async (req, res) => {
   }
   const updatedBlog = await Blog.findByIdAndUpdate(
     {
-      _id: req.params._id,
+      _id: req.params.id,
     },
     {
       postImage: updatedImage.url,
@@ -174,14 +174,45 @@ const getAllBlog = asyncHandler(async (req, res) => {
 });
 
 const getSingleBlog = asyncHandler(async (req, res) => {
-  const foundBlog = await Blog.findById({ _id: req.params._id });
-  if (!foundBlog) {
-    throw new apiError(404, "Blog not found");
-  }
+
+  const postDetails = await Blog.aggregate([
+    {
+      $match:{
+        _id: new mongoose.Types.ObjectId(req.params.id)
+      }
+    },
+    {
+      $lookup:{
+        from:"users",
+        localField:"owner",
+        foreignField:"_id",
+        as:"ownerDetails"
+      }
+    },
+    {
+      $unwind: "$ownerDetails"
+    },
+    {
+      $project: {
+        title: 1,
+        description: 1,
+        category: 1,
+        owner: 1,
+        postImage: 1,
+        createdAt:1,
+        "ownerDetails.username": 1,
+        "ownerDetails.avatar": 1 
+      }
+    }
+  ])
+  const blogDetails = postDetails[0];
+  const totalLikes = await Like.countDocuments({
+    blog: req.params.id,
+  });
 
   return res
     .status(200)
-    .json(new apiResponse(200, foundBlog, "blog fetched successfully"));
+    .json(new apiResponse(200, {...blogDetails, totalLikes}, "blog fetched successfully"));
 });
 
 const getUserBlogs = asyncHandler(async (req, res) => {

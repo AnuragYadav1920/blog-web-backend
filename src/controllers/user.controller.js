@@ -88,7 +88,6 @@ const registerUser = asyncHandler(async(req, res)=>{
 const loginUser = asyncHandler(async(req, res) =>{
 try {
         const {email, password} = req.body
-        // console.log(req.body);
         if(!email){
            throw new apiError(400, "Email is required")
         }
@@ -312,6 +311,8 @@ const updateUserPassword = asyncHandler(async(req, res)=>{
             )
 })
 
+
+// ḍelete this route
 const getUserDetails = asyncHandler(async(req, res)=>{
    
     const userDetails = await User.aggregate([

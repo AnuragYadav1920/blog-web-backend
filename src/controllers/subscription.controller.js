@@ -7,7 +7,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 const SubscribeAndUnsubscribe = asyncHandler(async (req, res) => {
   try {
-    const { subscribeTo, action } = req.body;
+    const { subscribeTo } = req.body;
     const subscriber = req.user._id;
 
     // Check if the user is already subscribed to the channel
@@ -16,45 +16,29 @@ const SubscribeAndUnsubscribe = asyncHandler(async (req, res) => {
       subscribedTo: subscribeTo,
     });
 
-    if (action === "subscribe") {
-      // If already subscribed, throw error
-      if (existingSubscription) {
-        throw new apiError(400, "Channel is already subscribed");
-      }
-
-      // Create a new subscription
-      const newSubscription = await Subscription.create({
-        subscriber: subscriber,
-        subscribedTo: subscribeTo,
-      });
-
-      return res
-        .status(200)
-        .json(new apiResponse(200, {}, "Subscribed successfully"));
-    }
-
-    if (action === "unsubscribe") {
-      // If not subscribed, throw error
-      if (!existingSubscription) {
-        throw new apiError(404, "Channel is not subscribed");
-      }
-
+    if (existingSubscription) {
       // Unsubscribe by deleting the existing subscription
-      await Subscription.deleteOne({
+      await Subscription.findOneAndDelete({
         subscriber: subscriber,
         subscribedTo: subscribeTo,
       });
 
-      return res
-        .status(200)
-        .json(new apiResponse(200, {}, "Unsubscribed successfully"));
+      return res.status(200).json(new apiResponse(200,{subscribed:false}, "Unsubscribed successfully"));
     }
 
-    throw new apiError(400, "Invalid action");
+    // Create a new subscription if not already subscribed
+    await Subscription.create({
+      subscriber: subscriber,
+      subscribedTo: subscribeTo,
+    });
+
+    return res.status(200).json(new apiResponse(200,{subscribed: true}, "Subscribed successfully"));
   } catch (error) {
+    console.error(error); 
     throw new apiError(500, "Server error");
   }
 });
+
 const getUserTotalSubscribers = asyncHandler(async (req, res) => {
   try {
     const totalSubscribers = await Subscription.countDocuments({

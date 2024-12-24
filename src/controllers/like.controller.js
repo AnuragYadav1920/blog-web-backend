@@ -19,12 +19,17 @@ const handleLikeAction = async (req, res) => {
       return res
         .status(200)
         .json(new apiResponse(200,{}, "post liked successfully"));
+    }else{
+      return res
+        .status(200)
+        .json(new apiResponse(200,{}, "you have already liked the post"));
     }
   } catch (error) {
     throw new apiError(500, "Server error");
   }
 };
 
+// delete this route
 const totalLikes = asyncHandler(async (req, res) => {
   try {
     const totalLikes = await Like.countDocuments({
